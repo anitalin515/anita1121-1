@@ -11,7 +11,12 @@ export type BackgroundTheme =
   | 'beach'
   | 'sky'
   | 'leisurely'
-  | 'relaxing';
+  | 'relaxing'
+  | 'bakery'
+  | 'forest'
+  | 'starlight'
+  | 'japanese'
+  | 'autumn';
 
 export type GameState = 'TITLE_MENU' | 'PLAYING' | 'PAUSED' | 'GAME_OVER';
 
@@ -52,7 +57,6 @@ export interface PlayerProfile {
   name: string;
   gender: Gender;
   difficulty: Difficulty;
-  theme: BackgroundTheme;
   bgmEnabled: boolean;
   sfxEnabled: boolean;
 }
@@ -219,7 +223,59 @@ export const THEME_META: Record<
     accent: '#4F9E6E',
     surfaceBg: 'rgba(249, 253, 250, 0.88)',
   },
+  bakery: {
+    label: '甜點烘焙',
+    swatch: '#FDE8EE',
+    accent: '#D96D89',
+    surfaceBg: 'rgba(255, 250, 252, 0.88)',
+  },
+  forest: {
+    label: '森林秘境',
+    swatch: '#E4F2E7',
+    accent: '#4E8F67',
+    surfaceBg: 'rgba(248, 252, 249, 0.88)',
+  },
+  starlight: {
+    label: '粉彩星空',
+    swatch: '#ECE8FC',
+    accent: '#7A68C7',
+    surfaceBg: 'rgba(251, 250, 255, 0.88)',
+  },
+  japanese: {
+    label: '日系和風',
+    swatch: '#FDF2EC',
+    accent: '#C96F63',
+    surfaceBg: 'rgba(254, 251, 249, 0.88)',
+  },
+  autumn: {
+    label: '暖陽楓葉',
+    swatch: '#FCEFDF',
+    accent: '#D17A47',
+    surfaceBg: 'rgba(255, 251, 247, 0.88)',
+  },
 };
+
+export const BACKGROUND_THEMES: BackgroundTheme[] = [
+  'garden',
+  'zoo',
+  'french',
+  'beach',
+  'sky',
+  'leisurely',
+  'relaxing',
+  'bakery',
+  'forest',
+  'starlight',
+  'japanese',
+  'autumn',
+];
+
+export function pickRandomTheme(exclude?: BackgroundTheme): BackgroundTheme {
+  const pool = exclude
+    ? BACKGROUND_THEMES.filter((t) => t !== exclude)
+    : BACKGROUND_THEMES;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 export const GENDER_LABELS: Record<Gender, string> = {
   male: '男',

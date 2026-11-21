@@ -20,33 +20,25 @@ import { AnimalTileSvg } from './AnimalTileSvg';
 
 interface TitleScreenProps {
   profile: PlayerProfile;
+  theme: BackgroundTheme;
   nameError: string | null;
   onUpdateProfile: (patch: Partial<PlayerProfile>) => void;
   onStartGame: () => void;
   onOpenLeaderboard: (difficulty: Difficulty) => void;
 }
 
-const THEMES: BackgroundTheme[] = [
-  'garden',
-  'zoo',
-  'french',
-  'beach',
-  'sky',
-  'leisurely',
-  'relaxing',
-];
-
 const DIFFICULTIES: Difficulty[] = ['easy', 'normal', 'hard'];
 const GENDERS: Gender[] = ['male', 'female', 'other'];
 
 export const TitleScreen: React.FC<TitleScreenProps> = ({
   profile,
+  theme,
   nameError,
   onUpdateProfile,
   onStartGame,
   onOpenLeaderboard,
 }) => {
-  const activeTheme = THEME_META[profile.theme];
+  const activeTheme = THEME_META[theme];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,38 +231,9 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             </div>
           </div>
 
-          {/* 7 Light Pastel Background Themes */}
-          <div>
-            <span className="block text-sm font-bold text-[#4A3A40] mb-1.5">
-              淺淡風格背景
-            </span>
-            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-              {THEMES.map((t) => {
-                const meta = THEME_META[t];
-                const selected = profile.theme === t;
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => onUpdateProfile({ theme: t })}
-                    className={`min-h-[46px] px-2 py-1.5 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      selected
-                        ? 'bg-white border-[#433339]/35 shadow-sm ring-2 ring-black/10'
-                        : 'bg-white/60 border-black/8 hover:bg-white/85'
-                    }`}
-                  >
-                    <span
-                      className="w-4 h-4 rounded-full border border-black/15 shrink-0"
-                      style={{ backgroundColor: meta.swatch }}
-                    />
-                    <span className="text-xs font-semibold text-[#4A3A40] whitespace-nowrap">
-                      {meta.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <p className="text-xs text-[#736268] pt-0.5">
+            每局將自動隨機切換 12 款淺淡粉彩背景風格（目前：{activeTheme.label}）
+          </p>
 
           {/* Primary Start Action & Mobile Utility Row */}
           <div className="pt-1 space-y-2.5">
@@ -321,7 +284,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           </div>
 
           <p className="text-center text-xs text-[#7E6D73] pt-0.5">
-            操作提示：點選欄位對準後按「確認下降」，支援鍵盤 ← / → 移動 · Space 降落 · Esc 暫停
+            操作提示：點選欄位直接下降，支援鍵盤 ← / → 移動 · Space 降落 · Esc 暫停
           </p>
         </form>
       </div>

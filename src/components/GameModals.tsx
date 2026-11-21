@@ -13,18 +13,7 @@ interface PauseModalProps {
   onResume: () => void;
   onRestart: () => void;
   onRequestQuit: () => void;
-  onChangeTheme: (theme: BackgroundTheme) => void;
 }
-
-const THEMES: BackgroundTheme[] = [
-  'garden',
-  'zoo',
-  'french',
-  'beach',
-  'sky',
-  'leisurely',
-  'relaxing',
-];
 
 export const PauseModal: React.FC<PauseModalProps> = ({
   isOpen,
@@ -32,7 +21,6 @@ export const PauseModal: React.FC<PauseModalProps> = ({
   onResume,
   onRestart,
   onRequestQuit,
-  onChangeTheme,
 }) => {
   if (!isOpen) return null;
   const themeMeta = THEME_META[theme];
@@ -55,37 +43,6 @@ export const PauseModal: React.FC<PauseModalProps> = ({
           <p className="text-xs text-[#736268] mt-1">
             目前倒數計時已暫時凍結，隨時可繼續挑戰
           </p>
-        </div>
-
-        {/* Quick Background Theme Switch */}
-        <div>
-          <span className="block text-xs font-bold text-[#5E4D53] mb-2">
-            切換淺淡背景風格
-          </span>
-          <div className="grid grid-cols-4 gap-1.5">
-            {THEMES.map((t) => {
-              const meta = THEME_META[t];
-              const selected = theme === t;
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => onChangeTheme(t)}
-                  className={`min-h-[40px] px-1.5 py-1 rounded-xl border flex items-center justify-center gap-1 text-xs font-semibold cursor-pointer ${
-                    selected
-                      ? 'bg-white border-black/30 ring-2 ring-black/10'
-                      : 'bg-black/[0.025] border-black/8'
-                  }`}
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full border border-black/15 shrink-0"
-                    style={{ backgroundColor: meta.swatch }}
-                  />
-                  <span className="truncate">{meta.label}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         <div className="space-y-2.5 pt-1">

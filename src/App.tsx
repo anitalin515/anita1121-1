@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Flag,
   Music,
-  Palette,
   Pause,
   Trophy,
   Volume2,
@@ -31,6 +30,7 @@ import {
   PlayerProfile,
   THEME_META,
   getEffectivePushIntervalMs,
+  pickRandomTheme,
 } from './types/game';
 import { soundEngine } from './utils/audio';
 import {
@@ -55,22 +55,13 @@ import {
   validatePlayerName,
 } from './utils/storage';
 
-const THEME_ORDER: BackgroundTheme[] = [
-  'garden',
-  'zoo',
-  'french',
-  'beach',
-  'sky',
-  'leisurely',
-  'relaxing',
-];
-
 function waitMs(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 export default function App() {
   const [profile, setProfile] = useState<PlayerProfile>(() => loadPlayerProfile());
+  const [theme, setTheme] = useState<BackgroundTheme>(() => pickRandomTheme());
   const [nameError, setNameError] = useState<string | null>(null);
 
   const [gameState, setGameState] = useState<GameState>('TITLE_MENU');
@@ -147,12 +138,6 @@ export default function App() {
     }
   }, []);
 
-  const cycleTheme = useCallback(() => {
-    const idx = THEME_ORDER.indexOf(profile.theme);
-    const nextTheme = THEME_ORDER[(idx + 1) % THEME_ORDER.length];
-    updateProfile({ theme: nextTheme });
-  }, [profile.theme, updateProfile]);
-
   const addFloatingScore = useCallback(
     (coords: Coord[], points: number, combo: number, isWild = false) => {
       if (coords.length === 0) return;
@@ -214,6 +199,8 @@ export default function App() {
       updateProfile({ name: check.trimmed });
     }
 
+    setTheme((prev) => pickRandomTheme(prev));
+
     soundEngine.unlock();
     sessionTokenRef.current += 1;
 
@@ -239,52 +226,29 @@ export default function App() {
     setGameState('PLAYING');
   }, [profile.difficulty, profile.name, updateProfile]);
 
-  const handleSelectColumn = useCallback(
-    (col: number) => {
+  const dropInColumn = useCallback(
+    async (targetCol: number) => {
       if (gameState !== 'PLAYING' || isResolving || confirmQuitOpen) return;
-      if (col < 0 || col >= GRID_COLS) return;
-      if (col !== activeColumn) {
-        soundEngine.unlock();
-        soundEngine.playMove();
-        setActiveColumn(col);
-      }
-    },
-    [activeColumn, confirmQuitOpen, gameState, isResolving]
-  );
+      if (targetCol < 0 || targetCol >= GRID_COLS) return;
 
-  const handleMoveColumn = useCallback(
-    (delta: number) => {
-      if (gameState !== 'PLAYING' || isResolving || confirmQuitOpen) return;
-      const target = Math.max(0, Math.min(GRID_COLS - 1, activeColumn + delta));
-      if (target !== activeColumn) {
-        soundEngine.unlock();
-        soundEngine.playMove();
-        setActiveColumn(target);
-      }
-    },
-    [activeColumn, confirmQuitOpen, gameState, isResolving]
-  );
+      const currentGrid = gridRef.current;
+      const dropRow = getLandingRow(currentGrid, targetCol);
+      if (dropRow < 0) return;
 
-  const handleConfirmDrop = useCallback(async () => {
-    if (gameState !== 'PLAYING' || isResolving || confirmQuitOpen) return;
+      setActiveColumn(targetCol);
+      soundEngine.unlock();
+      soundEngine.playDrop();
+      setIsResolving(true);
+      const token = sessionTokenRef.current;
 
-    const currentGrid = gridRef.current;
-    const dropRow = getLandingRow(currentGrid, activeColumn);
-    if (dropRow < 0) return;
+      const { gridWithOrb, clearedCoords, isWildHit } = placeAndCheckImpact(
+        currentGrid,
+        dropRow,
+        targetCol,
+        currentOrb
+      );
 
-    soundEngine.unlock();
-    soundEngine.playDrop();
-    setIsResolving(true);
-    const token = sessionTokenRef.current;
-
-    const { gridWithOrb, clearedCoords, isWildHit } = placeAndCheckImpact(
-      currentGrid,
-      dropRow,
-      activeColumn,
-      currentOrb
-    );
-
-    setGrid(gridWithOrb);
+      setGrid(gridWithOrb);
 
     let runningScore = score;
     let runningCleared = clearedCount;
@@ -374,20 +338,45 @@ export default function App() {
       return;
     }
 
-    setIsResolving(false);
-  }, [
-    activeColumn,
-    addFloatingScore,
-    clearedCount,
-    confirmQuitOpen,
-    currentOrb,
-    finishGame,
-    gameState,
-    isResolving,
-    maxCombo,
-    nextOrb,
-    score,
-  ]);
+      setIsResolving(false);
+    },
+    [
+      addFloatingScore,
+      clearedCount,
+      confirmQuitOpen,
+      currentOrb,
+      finishGame,
+      gameState,
+      isResolving,
+      maxCombo,
+      nextOrb,
+      score,
+    ]
+  );
+
+  const handleSelectColumn = useCallback(
+    (col: number) => {
+      void dropInColumn(col);
+    },
+    [dropInColumn]
+  );
+
+  const handleMoveColumn = useCallback(
+    (delta: number) => {
+      if (gameState !== 'PLAYING' || isResolving || confirmQuitOpen) return;
+      const target = Math.max(0, Math.min(GRID_COLS - 1, activeColumn + delta));
+      if (target !== activeColumn) {
+        soundEngine.unlock();
+        soundEngine.playMove();
+        setActiveColumn(target);
+      }
+    },
+    [activeColumn, confirmQuitOpen, gameState, isResolving]
+  );
+
+  const handleConfirmDrop = useCallback(() => {
+    void dropInColumn(activeColumn);
+  }, [activeColumn, dropInColumn]);
 
   // Bottom Row Push-Up Interval Timer (accelerates every 30s survived)
   useEffect(() => {
@@ -478,7 +467,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [gameState, handleConfirmDrop, handleMoveColumn, leaderboardOpen]);
 
-  const activeTheme = THEME_META[profile.theme];
+  const activeTheme = THEME_META[theme];
   const effectiveIntervalMs = getEffectivePushIntervalMs(
     profile.difficulty,
     elapsedMs
@@ -493,11 +482,12 @@ export default function App() {
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-x-hidden">
-      <PastelBackdrop theme={profile.theme} />
+      <PastelBackdrop theme={theme} />
 
       {gameState === 'TITLE_MENU' ? (
         <TitleScreen
           profile={profile}
+          theme={theme}
           nameError={nameError}
           onUpdateProfile={updateProfile}
           onStartGame={startNewSession}
@@ -557,17 +547,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right: Audio, Theme, Pause & Quit */}
+            {/* Right: Audio, Pause & Quit */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={cycleTheme}
-                aria-label="切換背景風格"
-                title={`背景：${activeTheme.label}`}
-                className="min-w-[44px] min-h-[44px] px-2.5 rounded-xl bg-white/85 hover:bg-white border border-black/10 text-[#433339] flex items-center justify-center gap-1 cursor-pointer lg:hidden"
-              >
-                <Palette className="w-4 h-4" />
-              </button>
 
               <button
                 type="button"
@@ -651,7 +632,7 @@ export default function App() {
                 floatingScores={floatingScores}
                 isResolving={isResolving}
                 nearDanger={nearDanger}
-                theme={profile.theme}
+                theme={theme}
                 comboCount={comboCount}
                 onSelectColumn={handleSelectColumn}
                 onMoveColumn={handleMoveColumn}
@@ -686,39 +667,8 @@ export default function App() {
                     </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Quick Theme Switcher */}
-              <div
-                className="rounded-3xl border border-black/10 p-5 shadow-sm backdrop-blur-sm"
-                style={{ backgroundColor: activeTheme.surfaceBg }}
-              >
-                <p className="text-xs font-bold text-[#6E5B62] mb-2.5">
-                  淺淡背景風格
-                </p>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {THEME_ORDER.map((t) => {
-                    const meta = THEME_META[t];
-                    const selected = profile.theme === t;
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => updateProfile({ theme: t })}
-                        className={`min-h-[38px] px-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all ${
-                          selected
-                            ? 'bg-white border-black/30 shadow-xs'
-                            : 'bg-white/55 border-black/8 hover:bg-white/80'
-                        }`}
-                      >
-                        <span
-                          className="w-3 h-3 rounded-full border border-black/15 shrink-0"
-                          style={{ backgroundColor: meta.swatch }}
-                        />
-                        <span className="truncate">{meta.label}</span>
-                      </button>
-                    );
-                  })}
+                <div className="pt-1 text-xs text-[#7B6B71]">
+                  目前隨機背景：<span className="font-semibold text-[#4A3A40]">{activeTheme.label}</span>
                 </div>
               </div>
 
@@ -772,7 +722,7 @@ export default function App() {
           </div>
 
           <p className="hidden sm:block text-center text-[11px] text-[#7E6D73] pt-1">
-            點選欄位對準 · ←/→ 移動 · Space 確認下降 · Esc 暫停
+            點選欄位直接下降 · ←/→ 移動 · Space 降落 · Esc 暫停
           </p>
         </main>
       )}
@@ -780,11 +730,10 @@ export default function App() {
       {/* Modals */}
       <PauseModal
         isOpen={gameState === 'PAUSED' && !confirmQuitOpen}
-        theme={profile.theme}
+        theme={theme}
         onResume={() => setGameState('PLAYING')}
         onRestart={startNewSession}
         onRequestQuit={() => setConfirmQuitOpen(true)}
-        onChangeTheme={(t) => updateProfile({ theme: t })}
       />
 
       <ConfirmQuitModal
@@ -809,7 +758,7 @@ export default function App() {
         maxCombo={maxCombo}
         clearedCount={clearedCount}
         rank={lastRank}
-        theme={profile.theme}
+        theme={theme}
         onPlayAgain={startNewSession}
         onOpenLeaderboard={() => {
           setLeaderboardDiff(profile.difficulty);

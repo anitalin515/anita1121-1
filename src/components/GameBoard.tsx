@@ -45,6 +45,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   onConfirmDrop,
 }) => {
   const touchStartXRef = useRef<number | null>(null);
+  const didSwipeRef = useRef(false);
+  const [hoveredCol, setHoveredCol] = React.useState<number | null>(null);
   const themeMeta = THEME_META[theme];
   const landingRow = getLandingRow(grid, activeColumn);
   const matchPreview = isResolving
@@ -52,6 +54,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     : previewMatchKeys(grid, activeColumn, currentOrb);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    didSwipeRef.current = false;
     touchStartXRef.current = e.touches[0].clientX;
   };
 
@@ -59,9 +62,20 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     if (touchStartXRef.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartXRef.current;
     touchStartXRef.current = null;
+    if (Math.abs(dx) > 20) {
+      didSwipeRef.current = true;
+      window.setTimeout(() => {
+        didSwipeRef.current = false;
+      }, 60);
+    }
     if (Math.abs(dx) > 36) {
       onMoveColumn(dx > 0 ? 1 : -1);
     }
+  };
+
+  const handleColumnClick = (col: number) => {
+    if (didSwipeRef.current || isResolving) return;
+    onSelectColumn(col);
   };
 
   return (
@@ -88,17 +102,26 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       </div>
 
       {/* Column Launcher Track */}
-      <div className="w-full grid grid-cols-7 gap-1 px-2 py-1 rounded-t-2xl bg-white/75 border border-b-0 border-black/10">
+      <div
+        onMouseLeave={() => setHoveredCol(null)}
+        className="w-full grid grid-cols-7 gap-1 px-2 py-1 rounded-t-2xl bg-white/75 border border-b-0 border-black/10"
+      >
         {Array.from({ length: GRID_COLS }).map((_, col) => {
           const isActive = col === activeColumn;
+          const isHovered = hoveredCol === col && !isResolving;
           return (
             <button
               key={col}
               type="button"
-              onClick={() => onSelectColumn(col)}
-              aria-label={`對準第 ${col + 1} 欄`}
+              onClick={() => handleColumnClick(col)}
+              onMouseEnter={() => setHoveredCol(col)}
+              aria-label={`點選並下降至第 ${col + 1} 欄`}
               className={`h-11 sm:h-12 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
-                isActive ? 'bg-black/5' : 'hover:bg-black/3'
+                isActive
+                  ? 'bg-black/5'
+                  : isHovered
+                  ? 'bg-black/[0.04]'
+                  : 'hover:bg-black/3'
               }`}
             >
               {isActive && !isResolving ? (
@@ -117,6 +140,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       <div
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onMouseLeave={() => setHoveredCol(null)}
         className="relative w-full aspect-[7/10] max-h-[60dvh] rounded-b-2xl border border-black/12 shadow-sm overflow-hidden p-2"
         style={{ backgroundColor: 'rgba(255, 255, 255, 0.84)' }}
       >
@@ -148,6 +172,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
               const isClearing = clearingKeys.has(key);
               const isMatchTarget = matchPreview.has(key);
               const isActiveCol = c === activeColumn;
+              const isHoveredCol = hoveredCol === c && !isResolving;
               const isGhostLanding =
                 !isResolving && isActiveCol && r === landingRow && !tile;
 
@@ -155,10 +180,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 <button
                   key={key}
                   type="button"
-                  onClick={() => onSelectColumn(c)}
-                  aria-label={`第 ${r + 1} 列 第 ${c + 1} 欄`}
+                  onClick={() => handleColumnClick(c)}
+                  onMouseEnter={() => setHoveredCol(c)}
+                  aria-label={`點選下降至第 ${c + 1} 欄`}
                   className={`relative w-full h-full rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
-                    isActiveCol ? 'bg-black/[0.035]' : ''
+                    isHoveredCol
+                      ? 'bg-black/[0.055]'
+                      : isActiveCol
+                      ? 'bg-black/[0.035]'
+                      : ''
                   }`}
                 >
                   {/* Ghost Landing Indicator */}

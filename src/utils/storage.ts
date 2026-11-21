@@ -11,7 +11,6 @@ const DEFAULT_PROFILE: PlayerProfile = {
   name: '',
   gender: 'female',
   difficulty: 'normal',
-  theme: 'garden',
   bgmEnabled: true,
   sfxEnabled: true,
 };
@@ -51,8 +50,17 @@ export function loadPlayerProfile(): PlayerProfile {
     if (!raw) return DEFAULT_PROFILE;
     const parsed = JSON.parse(raw) as Partial<PlayerProfile>;
     return {
-      ...DEFAULT_PROFILE,
-      ...parsed,
+      name: typeof parsed.name === 'string' ? parsed.name : DEFAULT_PROFILE.name,
+      gender: parsed.gender || DEFAULT_PROFILE.gender,
+      difficulty: parsed.difficulty || DEFAULT_PROFILE.difficulty,
+      bgmEnabled:
+        typeof parsed.bgmEnabled === 'boolean'
+          ? parsed.bgmEnabled
+          : DEFAULT_PROFILE.bgmEnabled,
+      sfxEnabled:
+        typeof parsed.sfxEnabled === 'boolean'
+          ? parsed.sfxEnabled
+          : DEFAULT_PROFILE.sfxEnabled,
     };
   } catch {
     return DEFAULT_PROFILE;

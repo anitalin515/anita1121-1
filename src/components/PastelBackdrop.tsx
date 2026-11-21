@@ -316,6 +316,205 @@ export const PastelBackdrop: React.FC<PastelBackdropProps> = ({ theme }) => {
           </svg>
         </div>
       )}
+
+      {theme === 'bakery' && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(170deg, #FFF5F7 0%, #FFF9F3 52%, #FCEEF2 100%)',
+          }}
+        >
+          <svg
+            className="absolute inset-0 w-full h-full opacity-80"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            {/* Pastel striped awning */}
+            {Array.from({ length: 16 }).map((_, i) => (
+              <rect
+                key={i}
+                x={i * 75}
+                y="0"
+                width="75"
+                height="48"
+                fill={i % 2 === 0 ? '#FADBE3' : '#FFF8F3'}
+              />
+            ))}
+            {/* Soft cupcake left bottom */}
+            <path d="M100 790 L180 790 L166 845 L114 845 Z" fill="#F4D7C8" />
+            <path
+              d="M94 790 Q98 748 140 748 Q182 748 186 790 Z"
+              fill="#FAD2DF"
+            />
+            <circle cx="140" cy="744" r="10" fill="#F59BB2" />
+            {/* Donut / pastry right */}
+            <circle cx="1040" cy="790" r="48" fill="#F7E0C8" />
+            <circle cx="1040" cy="790" r="42" fill="#FDE2EB" />
+            <circle cx="1040" cy="790" r="17" fill="#FCEEF2" />
+            {/* Sugar sprinkles */}
+            <circle cx="1020" cy="768" r="3" fill="#FFF0A8" />
+            <circle cx="1062" cy="772" r="3" fill="#BFE7FA" />
+            <circle cx="1055" cy="812" r="3" fill="#C7F0DB" />
+          </svg>
+        </div>
+      )}
+
+      {theme === 'forest' && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(175deg, #EEF6F0 0%, #F4F9F3 52%, #E8F2E8 100%)',
+          }}
+        >
+          <svg
+            className="absolute inset-0 w-full h-full opacity-80"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            {/* Misty distant hills */}
+            <path
+              d="M0 730 Q300 660 620 720 T1200 700 L1200 900 L0 900 Z"
+              fill="#DCECDD"
+            />
+            {/* Pine tree silhouettes */}
+            <g fill="#CDE2CF">
+              <polygon points="110,610 55,780 165,780" />
+              <polygon points="190,650 140,800 240,800" />
+              <polygon points="1030,620 975,790 1085,790" />
+              <polygon points="1110,660 1060,810 1160,810" />
+            </g>
+            {/* Cute pastel mushrooms */}
+            <rect x="130" y="810" width="16" height="28" rx="6" fill="#FBF5EB" />
+            <path d="M110 815 Q138 775 166 815 Z" fill="#F6C8CF" />
+            <circle cx="130" cy="802" r="4" fill="#FFF9F7" />
+            <circle cx="146" cy="806" r="3" fill="#FFF9F7" />
+            {/* Firefly soft glow */}
+            <circle cx="240" cy="260" r="14" fill="#FFF6C9" opacity="0.7" />
+            <circle cx="960" cy="290" r="18" fill="#FFF6C9" opacity="0.65" />
+          </svg>
+        </div>
+      )}
+
+      {theme === 'starlight' && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, #EFEBFB 0%, #F5F2FD 54%, #FBEFF6 100%)',
+          }}
+        >
+          <svg
+            className="absolute inset-0 w-full h-full opacity-85"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            {/* Soft crescent moon */}
+            <circle cx="160" cy="150" r="48" fill="#FFF2B8" />
+            <circle cx="180" cy="140" r="42" fill="#EFEBFB" />
+            {/* Pastel stars */}
+            {[
+              [260, 110, 10],
+              [990, 140, 12],
+              [1080, 220, 8],
+              [120, 320, 9],
+              [1030, 680, 11],
+              [180, 740, 10],
+            ].map(([x, y, r], i) => (
+              <polygon
+                key={i}
+                points={`${x},${y - r} ${x + r * 0.3},${y - r * 0.3} ${x + r},${y} ${x + r * 0.3},${y + r * 0.3} ${x},${y + r} ${x - r * 0.3},${y + r * 0.3} ${x - r},${y} ${x - r * 0.3},${y - r * 0.3}`}
+                fill="#FFE9A3"
+              />
+            ))}
+            {/* Dreamy pastel clouds */}
+            <g fill="#FFFFFF" opacity="0.8">
+              <circle cx="140" cy="820" r="60" />
+              <circle cx="220" cy="805" r="76" />
+              <circle cx="305" cy="825" r="58" />
+              <circle cx="980" cy="815" r="64" />
+              <circle cx="1065" cy="800" r="78" />
+            </g>
+          </svg>
+        </div>
+      )}
+
+      {theme === 'japanese' && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, #FDF6F2 0%, #FCF8F4 55%, #F8EEEB 100%)',
+          }}
+        >
+          <svg
+            className="absolute inset-0 w-full h-full opacity-80"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            {/* Gentle Mt. Fuji silhouette */}
+            <polygon
+              points="760,900 950,620 1050,620 1240,900"
+              fill="#DCE9F5"
+            />
+            <polygon
+              points="915,672 950,620 1050,620 1085,672 1045,658 1005,676 960,658"
+              fill="#FFFFFF"
+            />
+            {/* Soft sun circle */}
+            <circle cx="1010" cy="210" r="66" fill="#FAD7D7" opacity="0.7" />
+            {/* Sakura petals */}
+            <g fill="#FAD0DC">
+              <ellipse cx="140" cy="170" rx="12" ry="7" transform="rotate(28 140 170)" />
+              <ellipse cx="210" cy="230" rx="10" ry="6" transform="rotate(-18 210 230)" />
+              <ellipse cx="165" cy="760" rx="12" ry="7" transform="rotate(35 165 760)" />
+              <ellipse cx="240" cy="810" rx="11" ry="6" transform="rotate(-24 240 810)" />
+            </g>
+          </svg>
+        </div>
+      )}
+
+      {theme === 'autumn' && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(175deg, #FFF7EE 0%, #FDF4EA 55%, #FBECE0 100%)',
+          }}
+        >
+          <svg
+            className="absolute inset-0 w-full h-full opacity-80"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            {/* Warm sunbeams */}
+            <circle cx="150" cy="140" r="88" fill="#FFE7C2" opacity="0.6" />
+            {/* Soft pastel hills */}
+            <path
+              d="M0 780 Q360 720 720 770 T1200 750 L1200 900 L0 900 Z"
+              fill="#F7DEC8"
+            />
+            {/* Floating autumn leaves */}
+            {[
+              { x: 130, y: 260, rot: -20, c: '#F5B89E' },
+              { x: 1050, y: 210, rot: 25, c: '#F8CA9D' },
+              { x: 190, y: 740, rot: 15, c: '#F3B49E' },
+              { x: 1010, y: 760, rot: -30, c: '#F8D49E' },
+            ].map((leaf, i) => (
+              <g
+                key={i}
+                transform={`translate(${leaf.x}, ${leaf.y}) rotate(${leaf.rot})`}
+                fill={leaf.c}
+              >
+                <ellipse cx="0" cy="0" rx="18" ry="11" />
+                <ellipse cx="-8" cy="-10" rx="11" ry="7" transform="rotate(-35 -8 -10)" />
+                <ellipse cx="8" cy="-10" rx="11" ry="7" transform="rotate(35 8 -10)" />
+              </g>
+            ))}
+          </svg>
+        </div>
+      )}
     </div>
   );
 };
