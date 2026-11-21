@@ -1,0 +1,6 @@
+{
+  "name": "萌寵圓球消消樂",
+  "description": "日系粉彩手繪風格 2D 可愛動物圓形魔術方塊消除手機遊戲，支援多難度推升、連鎖遞補計分、7 款淺淡背景與單機排行榜。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
